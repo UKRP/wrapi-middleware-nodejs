@@ -47,7 +47,7 @@ class Station {
             this.ondemand = {seriesId: {}, pure:{}};
         }
         else{
-            let response = this.getPaginatedData((seriesId)? this.ondemand.seriesId[seriesId] : this.ondemand.pure, params, query, type);
+            let response = tools.getPaginatedData((seriesId)? this.ondemand.seriesId[seriesId] : this.ondemand.pure, params, query, type);
             if(response) return response;
         }
         try {
@@ -90,35 +90,6 @@ class Station {
         }
     }
 
-    getPaginatedData(list, params, query, type){
-        if(list){
-            if(list.data){
-                if(new Date().getTime() > list.data.nextUpdate){
-                    return new Response(list.nextUpdate, list.data, params, type);
-                }
-            }
-            else{
-                let page = (query.page)? query.page : 0;
-                let size = (query.size)? query.size : 10;
-                if(list[page] && list[page][size] && (list[page][size].meta.paginated || (list[page][size].meta.nesting && list[page][size].data[0].meta.paginated))){
-                    if(new Date().getTime() < list[page][size].nextUpdate){
-                        let response;
-                        if(list[page][size].meta.nesting){
-                            response = new Response(list[page][size].nextUpdate, list[page][size].data[0].data, params, type);
-                            response.setPagination(list[page][size].data[0].meta.pageNumber, list[page][size].data[0].meta.pageSize, list[page][size].data[0].meta.totalPages);
-                        }
-                        else{
-                            response = new Response(list[page][size].nextUpdate, list[page][size].data, params, type);
-                            response.setPagination(list[page][size].meta.pageNumber, list[page][size].meta.pageSize, list[page][size].meta.totalPages);
-                        }
-                        return response;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
     async getSchedulePrograms(query, wp){
         let wrapi_params = {rpuids: [this.data.rpuid], ...query};
         let rqt_params = {rpuid: this.data.rpuid, ...query};
@@ -131,7 +102,7 @@ class Station {
                 this.schedule = {};
             }
             else{
-                let response = this.getPaginatedData(this.schedule, rqt_params, query, type);
+                let response = tools.getPaginatedData(this.schedule, rqt_params, query, type);
                 if(response) return response;
             }
             try {

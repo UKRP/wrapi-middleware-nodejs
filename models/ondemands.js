@@ -1,5 +1,6 @@
 const Response = require('./response');
 
+const logger = require('../logger');
 const tools = require('../tools');
 
 class OnDemands {
@@ -8,36 +9,37 @@ class OnDemands {
     }
 
     async getOnDemand(query, wp){
-        // Results got pagination but we can't send page or size parameters in request, we can't use cache ...
-        return await wp.getOnDemand(query);
-        // Categories aren't in response keys we got, we can't use cache
-        if(query.category) return await wp.getOnDemand(query);
-        // For request without category query, update object with all country data to put it in cache, filter result if needed then send it
-        if(!this.data || new Date().getTime() > this.nextUpdate){
-            let data = await wp.getOnDemand({country: query.country, page:1});
-            this.data = data.data;
-            this.meta = data.meta; 
-            this.nextUpdate = tools.setCachingTimeout('ondemand', data.meta.cacheExpiresAt);
+        if(query.category || query.search || query.rpuids) return await wp.getOnDemand(query);
+        let type = 'ondemand';
+        if(!this.ondemand){
+            this.ondemand = {};
         }
-
-        let result = [];
-        for(const it in this.data){
-            // If filter by rpuids
-            if(query.rpuids){
-                if(!query.rpuids.split(',').some(rpuid => rpuid === this.data[it].rpuid)) continue;
-            }
-            // If filter by a string
-            if(query.search){
-                if(!(
-                    (this.data[it].description && this.data[it].description.toLowerCase().includes(query.search.toLowerCase())) || 
-                    (this.data[it].name && this.data[it].name.toLowerCase().includes(query.search.toLowerCase()))
-                )){
-                    continue;
-                }
-            }
-            result.push(this.data[it]);
+        else{
+            let response = tools.getPaginatedData(this.ondemand, query, query, type);
+            if(response) return response;
         }
-        return new Response(this.nextUpdate, result, query, 'ondemand');
+        try {
+            let ondemand = await wp.getOnDemand(query);
+            if(ondemand.error) throw ondemand.error;
+            if(ondemand.meta.paginated){
+                let size = (query.size)? query.size : 10;
+                if(!this.ondemand[ondemand.meta.pageNumber]){this.ondemand[ondemand.meta.pageNumber] = {};}
+                this.ondemand[ondemand.meta.pageNumber][size] = ondemand;
+                this.ondemand[ondemand.meta.pageNumber][size].nextUpdate = tools.setCachingTimeout(type, ondemand.meta.cacheExpiresAt);
+                let response = new Response(this.ondemand[ondemand.meta.pageNumber][size].nextUpdate, this.ondemand[ondemand.meta.pageNumber][size].data, query, type);
+                response.setPagination(ondemand.meta.pageNumber, ondemand.meta.pageSize, ondemand.meta.totalPages);
+                return response;
+            }
+            else{
+                this.ondemand = ondemand;
+                this.ondemand.nextUpdate = tools.setCachingTimeout(type, ondemand.meta.cacheExpiresAt);
+                return new Response(this.ondemand.nextUpdate, this.ondemand.data, query, type);
+            }
+        }
+        catch(error){
+            logger.error('An error occured during Stations get onDemand update.', error);
+            if(error) throw error;
+        }
     }
 }
 

@@ -25,8 +25,8 @@ function validRpuids(req, res, next){
 		let rpuids = (req.params.rpuids)? req.params.rpuids.split(',') : [req.params.rpuid];
 		if(rpuids.every(rpuid => !isNaN(rpuid)) && rpuids.some(rpuid => stations_m.radioExist(rpuid))){
 			next();
-		}else{res.status(400).send('Bad Request.');}
-	}else{res.status(400).send('Bad Request.');}
+		}else{res.status(404).send('Station doesn\'t exist.');}
+	}else{res.status(404).send('Station doesn\'t exist.');}
 }
 
 /*
