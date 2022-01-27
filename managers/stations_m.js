@@ -21,26 +21,39 @@ class Stations_Manager {
      *	category searching, search by bearers and search for local station.
      */
     async getAllStations(query){
-        if(query.geo) {return await this.wp.getStations(query);}
+        let list = this.list;
+        if(query.geo) {
+            let coo = query.geo.split(',');
+            let lat = Math.round(coo[0]*10)/10;
+            let long = Math.round(coo[1]*10)/10;
+            if(!this.geo_list) this.geo_list = [];
+            if(!this.geo_list[lat]) this.geo_list[lat] = [];
+            if(!this.geo_list[lat][long]) {
+                const stations = await this.wp.getStations({country: query.country, geo: query.geo});
+                if(stations.error) throw stations.error;
+                this.geo_list[lat][long] = stations.data.map(station => new Station(station));
+            }
+            list = this.geo_list[lat][long];
+        }
         let stations = [];
-        for(const station_rpuid in this.list){
+        for(const station_rpuid in list){
             if(!query){
-                stations.push(this.list[station_rpuid].getData());
+                stations.push(list[station_rpuid].getData());
             }
             else {
                 if(query.include){
-                    if(!this.list[station_rpuid].include(query.include)) continue;
+                    if(!list[station_rpuid].include(query.include)) continue;
                 }
                 if(query.country){
-                    if(!(this.list[station_rpuid].data.country === query.country)) continue;
+                    if(!(list[station_rpuid].data.country === query.country)) continue;
                     if(query.search){
-                        if(!this.list[station_rpuid].contains(query.search)) continue;
+                        if(!list[station_rpuid].contains(query.search)) continue;
                     }
                 }
                 if(query.bearerId){
-                    if(!this.list[station_rpuid].gotBearerId(query.bearerId)) continue;
+                    if(!list[station_rpuid].gotBearerId(query.bearerId)) continue;
                 }
-                stations.push(this.list[station_rpuid].getData());
+                stations.push(list[station_rpuid].getData());
             }
         }
         if(query.sort){

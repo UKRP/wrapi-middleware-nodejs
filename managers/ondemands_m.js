@@ -23,7 +23,7 @@ class OnDemands_Manager {
             return onDemand;
         }
         catch(error){
-            logger.error('An error occured during Stations get categories update.', error);
+            logger.error('An error occured during OnDemand by odIds called on WRAPI.', error);
             throw error;
         }
     }

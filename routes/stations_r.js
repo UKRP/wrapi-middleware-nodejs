@@ -49,7 +49,7 @@ router.get('/', dataLoaded, async function(req, res) {
 	try {
 		let query = req.query;
 		if(!Object.keys(query).length || 
-			(query.country && ((query.search && !query.geo && !query.bearerId) || (query.geo && !query.search && !query.bearerId))) ||
+			(query.country && ((query.search && !query.geo && !query.bearerId) || (query.geo && query.geo.split(',').every(coo => !isNaN(coo)) && !query.search && !query.bearerId))) ||
 			(query.bearerId && (!query.search && !query.geo)) ||
 			(!query.search && !query.bearerId && !query.geo && (query.include || query.country || query.sort))
 		){
