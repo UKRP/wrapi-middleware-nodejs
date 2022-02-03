@@ -37,7 +37,7 @@ class Station {
                 if(error) throw error;
             }
         }
-        return new Response(this.onAir[key].nextUpdate, this.onAir[key].data, params);
+        return new Response(this.onAir[key].nextUpdate, this.onAir[key].data.data, {rpuid: this.data.rpuid, country: this.data.country});
     }
 
     async getOnDemand(query, wp, seriesId){
