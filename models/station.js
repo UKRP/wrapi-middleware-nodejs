@@ -28,12 +28,19 @@ class Station {
             try {
                 onAir = await wp.getOnAir(params);
                 if(onAir.error) throw onAir.error;
-                this.onAir[key].data = onAir.data[0];
-                this.onAir[key].nextUpdate = tools.setCachingTimeout('onair', onAir.data[0].meta.cacheExpiresAt);
+				if(onAir.data[0]){
+					this.onAir[key].data = onAir.data[0];
+					this.onAir[key].nextUpdate = tools.setCachingTimeout('onair', onAir.data[0].meta.cacheExpiresAt);
+				}
+				else{
+					this.onAir[key].data = null;
+					this.onAir[key].nextUpdate = null;
+					return new Response(0, [], {rpuid: this.data.rpuid, country: this.data.country});
+				}
             }
             catch(error){
                 this.onAir[key].data = null;
-                logger.error('An error occured during Stations get onAir update.', error);
+                logger.error('An error occured during Stations get onAir update.', 'rpuid :' + this.data.rpuid, error);
                 if(error) throw error;
             }
         }

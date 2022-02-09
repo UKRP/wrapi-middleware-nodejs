@@ -10,6 +10,10 @@ const app = express();
 
 const logger = require('./logger');
 
+const Base64 = require('js-base64');
+const Enum = require('./enum');
+Enum.Authorization = Enum.Authorization.map(x => "Basic " + Base64.btoa(x));
+
 /*
  *	Check if necessary files exist and data filled
  */
@@ -26,6 +30,12 @@ if(!fs.existsSync('./' + process.env.HTTPS_PRIVATE_KEY + '.pem') || !fs.existsSy
 	process.exit(1);
 }
 
+app.use((req,res,next) => {
+	if(Enum.Authorization.includes(req.headers.authorization)){
+		next();
+	}
+	else{res.status(401).send();}
+});
 app.use(cors());
 
 app.use(express.static("public"));
