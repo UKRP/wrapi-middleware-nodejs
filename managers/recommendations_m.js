@@ -9,7 +9,7 @@ class Recommendations_Manager {
         let key = this.generateKey(body);
         if(!this.cache.has(key) || this.cache.get(key).date < new Date().getTime()){
             let response = await this.wp.getRecommendation({...body});
-            this.cache.set(key, {date: response.meta.cacheExpiresAt, data: response});
+            this.cache.set(key, {date: (response.meta.cacheExpiresAt)? response.meta.cacheExpiresAt : new Date().getTime(), data: response});
         }
         return this.cache.get(key).data;
     }
