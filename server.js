@@ -42,6 +42,17 @@ app.use((req, res, next) => {
 		res.status(401).send();
 	}
 });
+
+const domTomFr = [312, 474, 638, 254];
+app.use((req, res, next) => {
+	// If query country code refer to France DOM TOM
+	if (domTomFr.includes(Number(req.query.country))) {
+		// change country code to France
+		req.query.country = '250';
+	} 
+	next();
+});
+
 app.use(cors());
 
 app.use(express.static("public"));
