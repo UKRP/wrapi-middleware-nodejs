@@ -1,6 +1,7 @@
 const Response = require("./response");
 
 const tools = require("../tools");
+const logger = require("../logger");
 
 class Categories {
 	constructor() {}
@@ -19,7 +20,7 @@ class Categories {
 					categories.meta.cacheExpiresAt,
 				);
 			} catch (error) {
-				this.categories[params.type].data = null;
+				if(this.data[params.type]) this.data[params.type].data = null;
 				logger.error("An error occured during Categories update.", error);
 				if (error) throw error;
 			}

@@ -44,20 +44,25 @@ app.use((req, res, next) => {
 });
 
 const domTomFr = [312, 474, 638, 254];
-app.use((req, res, next) => {
-	// If query country code refer to France DOM TOM
-	if (domTomFr.includes(Number(req.query.country))) {
-		// change country code to France
-		req.query.country = '250';
-	} 
-	next();
-});
 
 app.use(cors());
 
 app.use(express.static("public"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use((req, res, next) => {
+	// If query country code refer to France DOM TOM
+	if (domTomFr.includes(Number(req.body.country))) {
+		// change country code to France
+		req.body.country = '250';
+	}
+	if (domTomFr.includes(Number(req.query.country))) {
+		// change country code to France
+		req.query.country = '250';
+	}
+	next();
+});
 
 const categoriesRoutes = require("./routes/categories_r");
 const ondemandRoutes = require("./routes/ondemand_r");

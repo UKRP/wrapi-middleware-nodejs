@@ -15,12 +15,9 @@ const logger = require("../logger");
 router.post("/", async function (req, res) {
 	try {
 		if (
-			req.body.country &&
-			!isNaN(req.body.country) &&
-			Array.isArray(req.body.factors) &&
+			req.body.country && !isNaN(req.body.country) && Array.isArray(req.body.factors) &&
 			(!req.body.factors.includes("AFFINITY") || (req.body.rpuid && !isNaN(req.body.rpuid))) &&
-			(!req.body.factors.includes("GEO") ||
-				(req.body.longitude && !isNaN(req.body.longitude) && req.body.latitude && !isNaN(req.body.latitude))) &&
+			(!req.body.factors.includes("GEO") || (req.body.longitude && !isNaN(req.body.longitude) && req.body.latitude && !isNaN(req.body.latitude))) &&
 			(!req.body.factors.includes("MUSICMATCH") || (req.body.facebookArtists && req.body.artistPlayCounts))
 		) {
 			res.send(await dataManager.getRecommendationsManager().postRecommendations(req.body));

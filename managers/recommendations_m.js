@@ -7,7 +7,7 @@ class Recommendations_Manager {
 		this.station_m = station_m;
 		this.cache = new Map();
 		this.specialCountry = [
-			20, 100, 191, 196, 203, 233, 250, 300, 348, 352, 428, 440, 442, 470, 616, 620, 642, 703, 705,
+			20, 100, 191, 203, 233, 250, 348, 352, 428, 440, 470, 528, 616, 620, 642, 703, 705, 752
 		];
 	}
 
@@ -57,38 +57,6 @@ class Recommendations_Manager {
 					data: response,
 				});
 			}
-		}
-		return this.cache.get(key).data;
-	}
-
-	async postRecommendationsTest(body) {
-		let key = this.generateKey(body);
-		let response;
-		if (!this.cache.has(key) || this.cache.get(key).date < new Date().getTime()) {
-			if (body.country == 250) {
-				const instance = axios.create({
-					baseURL: process.env.frApiUrl,
-				});
-				instance.defaults.headers.common["Authorization"] = process.env.frApiAuth;
-				const result = await instance.get("/radios/recommended/worldwide");
-				response = {
-					data: result.data.items,
-					meta: {
-						nesting: false,
-						paginated: false,
-						dataType: "recommendations",
-						count: result.data.items.length,
-						fromCache: false,
-						cacheExpiresAt: new Date().getTime() + 3120000,
-					},
-				};
-			} else {
-				response = await this.wp.getRecommendation({ ...body });
-			}
-			this.cache.set(key, {
-				date: response.meta.cacheExpiresAt ? response.meta.cacheExpiresAt : new Date().getTime(),
-				data: response,
-			});
 		}
 		return this.cache.get(key).data;
 	}
