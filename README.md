@@ -5,8 +5,8 @@ This repository contains an WRAPI example Middleware that demonstrate connexions
 ## Installation
 
 ```
-$ git clone https://gitlab.com/radioplayer.rnd-projects/wrapi-example-middleware.git
-$ cd wrapi-example-middleware
+$ git clone https://github.com/Radioplayer/wrapi-middleware-nodejs.git
+$ cd wrapi-middleware-nodejs
 $ npm install
 ```
 
