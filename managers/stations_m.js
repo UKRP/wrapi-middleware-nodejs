@@ -21,7 +21,6 @@ class Stations_Manager {
 	 */
 	async getAllStations(query) {
 		let list = this.list;
-		const test = await this.wp.getStations({ country: query.country, include: query.include });
 		if (query.geo) {
 			let coo = query.geo.split(",");
 			let lat = Math.round(coo[0] * 10) / 10;
