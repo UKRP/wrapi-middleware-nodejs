@@ -1,21 +1,10 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
+const { query } = require('express-validator');
 
-const DataManager = require("../managers/data_m");
-const dataManager = new DataManager().getInstance();
+const OnDemandsC = require('../controllers/ondemands_c');
 
-const logger = require("../logger");
-
-/*
- *	Middleware which check pagination query validity
- */
-function validPagination(req, res, next) {
-	if ((!req.page || !isNaN(req.page)) && (!req.size || !isNaN(req.size))) {
-		next();
-	} else {
-		res.status(400).send("Bad Request.");
-	}
-}
+const tools = require('../tools');
 
 /*
  *  Returns details on all pieces of on-demand content, unless filtered by parameters which include text searching,
@@ -23,45 +12,22 @@ function validPagination(req, res, next) {
  *	WRAPI URL: https://api.radioplayer.org/v2/ondemand
  *	Call Reference : https://developers.radioplayer.org/api-reference/ondemand-1.0.html#search-for-and-retrieve-on-demand-content
  */
-router.get("/", validPagination, async function (req, res) {
-	try {
-		if (
-			req.query.country &&
-			!isNaN(req.query.country) &&
-			(!req.query.rpuids || req.query.rpuids.split(",").every((rpuid) => !isNaN(rpuid)))
-		) {
-			res.send(await dataManager.getOnDemandsManager().getOnDemand(req.query));
-		} else {
-			res.status(400).send("Bad Request.");
-		}
-	} catch (error) {
-		if (error.statusCode) res.status(error.statusCode).send("WRAPI error.");
-		else {
-			logger.error("An error occured on /ondemand/.", error);
-			res.status(500).send("Server error.");
-		}
-	}
-});
+router.get(
+	'/',
+	[
+		query('country').isInt({ min: 0 }).withMessage('Invalid country format'),
+		query('page').optional().isInt({ min: 1 }).withMessage('Invalid page format'),
+		query('size').optional().isInt({ min: 1 }).withMessage('Invalid size format'),
+	],
+	tools.requestErrorHandler,
+	OnDemandsC.getOnDemands,
+);
 
 /*
  *	Returns all information on a particular piece of on-demand content, identified by its OD ID.
  *	WRAPI URL: https://api.radioplayer.org/v2/ondemand/{odIds}
  *	Call Reference : https://developers.radioplayer.org/api-reference/ondemand-odIds-1.0.html#retrieve-on-demand-content-using-its-unique-id
  */
-router.get("/:odIds", validPagination, async function (req, res) {
-	try {
-		if (req.params.odIds) {
-			res.send(await dataManager.getOnDemandsManager().getOnDemandByIds(req.params.odIds));
-		} else {
-			res.status(400).send("Bad Request.");
-		}
-	} catch (error) {
-		if (error.statusCode) res.status(error.statusCode).send("WRAPI error.");
-		else {
-			logger.error("An error occured on /ondemand/{odIds}.", error);
-			res.status(500).send("Server error.");
-		}
-	}
-});
+router.get('/:odIds', OnDemandsC.getOnDemandByIds);
 
 module.exports = router;

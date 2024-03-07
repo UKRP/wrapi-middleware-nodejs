@@ -1,4 +1,4 @@
-const Meta = require("./meta");
+const Meta = require('./meta');
 
 /*
  *	Response class recreate the original WRAPI answer but with cache data in this API

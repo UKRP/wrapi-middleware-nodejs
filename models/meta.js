@@ -13,7 +13,7 @@ class Meta {
 			__this[key] = params[key];
 		}
 		this.dataType = type;
-		this.nesting = type === "schedule" || type === "onair";
+		this.nesting = type === 'schedule' || type === 'onair';
 	}
 
 	setPagination(pageNumber, size, totalPages) {
